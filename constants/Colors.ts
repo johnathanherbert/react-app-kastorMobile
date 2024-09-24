@@ -1,26 +1,49 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
 const tintColorLight = '#0a7ea4';
 const tintColorDark = '#fff';
 
 export const Colors = {
   light: {
     text: '#11181C',
-    background: '#fff',
+    background: '#f5f5f5',
     tint: tintColorLight,
-    icon: '#687076',
     tabIconDefault: '#687076',
     tabIconSelected: tintColorLight,
+    iconPrimary: '#333',
+    iconActive: '#0077ff',
+    inputBackground: 'white',
+    inputBorder: '#E2E8F0',
+    cardBackground: 'white',
+    buttonPrimary: '#4299E1',
+    buttonSecondary: '#FC8181',
+    buttonSuccess: '#68D391',
+    switchTrackOff: '#CBD5E0',
+    switchTrackOn: '#4299E1',
+    switchThumbOff: '#A0AEC0',
+    switchThumbOn: '#2B6CB0',
+    progressBar: '#4299E1',
+    excipienteNormal: '#4299E1',
+    excipienteSpecial: '#DC2626',
   },
   dark: {
     text: '#ECEDEE',
-    background: '#151718',
+    background: '#1a1a1a',
     tint: tintColorDark,
-    icon: '#9BA1A6',
     tabIconDefault: '#9BA1A6',
     tabIconSelected: tintColorDark,
+    iconPrimary: '#f0f0f0',
+    iconActive: '#63B3ED',
+    inputBackground: '#2a2a2a',
+    inputBorder: '#4a4a4a',
+    cardBackground: '#2a2a2a',
+    buttonPrimary: '#2b6cb0',
+    buttonSecondary: '#C53030',
+    buttonSuccess: '#2F855A',
+    switchTrackOff: '#4a4a4a',
+    switchTrackOn: '#2b6cb0',
+    switchThumbOff: '#a0aec0',
+    switchThumbOn: '#63b3ed',
+    progressBar: '#63B3ED',
+    excipienteNormal: '#63B3ED',
+    excipienteSpecial: '#F56565',
   },
 };
