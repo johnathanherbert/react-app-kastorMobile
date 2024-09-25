@@ -10,6 +10,7 @@ import {
   Alert,
   ActivityIndicator,
   Switch,
+  Clipboard,
 } from "react-native";
 import { supabase } from "../utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
@@ -77,6 +78,7 @@ export default function Index() {
   const [isLoading, setIsLoading] = useState(false);
   const [exibirAutomaticos, setExibirAutomaticos] = useState<boolean>(false);
   const [bins, setBins] = useState<{ numero: string; tara: string }[]>([]);
+  const ordensPesadas = ordens.filter((ordem) => ordem.pesado);
 
   useEffect(() => {
     loadData();
@@ -333,6 +335,32 @@ export default function Index() {
       )
     : excipientesFiltrados;
 
+  const handleCopyExcipientes = () => {
+    let excipientesText = "Materiais:\n\n";
+
+    Object.entries(excipientesFiltradosFinal).forEach(
+      ([excipient, { total, ordens }]) => {
+        excipientesText += `${excipient}:  ${total.toFixed(3)} kg\n`;
+
+        if (expandedExcipient === excipient) {
+          excipientesText += "Detalhes:\n";
+          ordens.forEach((ordem) => {
+            excipientesText += `  ${ordem.codigo} - ${
+              ordem.nome
+            }: ${ordem.quantidade.toFixed(3)} kg\n`;
+          });
+          excipientesText += "\n";
+        }
+      }
+    );
+
+    Clipboard.setString(excipientesText);
+    Alert.alert(
+      "Sucesso",
+      "Tabela de excipientes copiada para a área de transferência."
+    );
+  };
+
   return (
     <SafeAreaView
       style={[styles.container, isDarkMode && styles.darkContainer]}
@@ -578,64 +606,71 @@ export default function Index() {
             </View>
 
             <View style={styles.ordensContainer}>
-              <Text
-                style={[styles.sectionTitle, isDarkMode && styles.darkText]}
-              >
-                Ordens Pesadas
-              </Text>
-              {ordens
-                .filter((ordem) => ordem.pesado)
-                .map((ordem, index) => (
-                  <View
-                    key={ordens.indexOf(ordem)}
-                    style={[
-                      styles.ordemItem,
-                      styles.ordemPesada,
-                      isDarkMode && styles.darkOrdemPesada,
-                    ]}
+              <View style={styles.ordensPesadasHeader}>
+                <Text
+                  style={[styles.sectionTitle, isDarkMode && styles.darkText]}
+                >
+                  Ordens Pesadas
+                </Text>
+                <Text
+                  style={[
+                    styles.ordensPesadasCount,
+                    isDarkMode ? styles.darkByText : styles.byText
+                  ]}
+                >
+                  {ordensPesadas.length} OPs pesadas
+                </Text>
+              </View>
+              {ordensPesadas.map((ordem, index) => (
+                <View
+                  key={ordens.indexOf(ordem)}
+                  style={[
+                    styles.ordemItem,
+                    styles.ordemPesada,
+                    isDarkMode && styles.darkOrdemPesada,
+                  ]}
+                >
+                  <TouchableOpacity
+                    onPress={() => handleTogglePesado(ordens.indexOf(ordem))}
+                    style={styles.checkboxButton}
                   >
-                    <TouchableOpacity
-                      onPress={() => handleTogglePesado(ordens.indexOf(ordem))}
-                      style={styles.checkboxButton}
-                    >
-                      <Ionicons
-                        name="checkbox-outline"
-                        size={24}
-                        color={isDarkMode ? "#81b0ff" : "#4299E1"}
-                      />
-                    </TouchableOpacity>
-                    <View style={styles.ordemButton}>
-                      <Text style={[styles.ordemText, styles.ordemTextPesada]}>
-                        {ordem.codigo} - {ordem.nome}
+                    <Ionicons
+                      name="checkbox-outline"
+                      size={24}
+                      color={isDarkMode ? "#81b0ff" : "#4299E1"}
+                    />
+                  </TouchableOpacity>
+                  <View style={styles.ordemButton}>
+                    <Text style={[styles.ordemText, styles.ordemTextPesada]}>
+                      {ordem.codigo} - {ordem.nome}
+                    </Text>
+                    {ordem.op && (
+                      <Text style={[styles.opText, styles.ordemTextPesada]}>
+                        OP: {ordem.op}{" "}
+                        {ordem.bins && ordem.bins.length > 0 && (
+                          <>
+                            {ordem.bins.map((bin, binIndex) => (
+                              <Text key={binIndex}>
+                                Bin {binIndex + 1}: {bin.numero} - {bin.tara} kg
+                              </Text>
+                            ))}
+                          </>
+                        )}
                       </Text>
-                      {ordem.op && (
-                        <Text style={[styles.opText, styles.ordemTextPesada]}>
-                          OP: {ordem.op}{" "}
-                          {ordem.bins && ordem.bins.length > 0 && (
-                            <>
-                              {ordem.bins.map((bin, binIndex) => (
-                                <Text key={binIndex}>
-                                  Bin {binIndex + 1}: {bin.numero} - {bin.tara}{" "}
-                                  kg
-                                </Text>
-                              ))}
-                            </>
-                          )}
-                        </Text>
-                      )}
-                    </View>
-                    <TouchableOpacity
-                      onPress={() => handleRemoveOrdem(ordens.indexOf(ordem))}
-                      style={styles.actionButton}
-                    >
-                      <Ionicons
-                        name="close-circle-outline"
-                        size={24}
-                        color={isDarkMode ? "#FF6B6B" : "#E53E3E"}
-                      />
-                    </TouchableOpacity>
+                    )}
                   </View>
-                ))}
+                  <TouchableOpacity
+                    onPress={() => handleRemoveOrdem(ordens.indexOf(ordem))}
+                    style={styles.actionButton}
+                  >
+                    <Ionicons
+                      name="close-circle-outline"
+                      size={24}
+                      color={isDarkMode ? "#FF6B6B" : "#E53E3E"}
+                    />
+                  </TouchableOpacity>
+                </View>
+              ))}
             </View>
 
             <View style={styles.excipientesContainer}>
@@ -805,6 +840,24 @@ export default function Index() {
                   </TouchableOpacity>
                 )
               )}
+              <TouchableOpacity
+                style={[styles.copyButton, isDarkMode && styles.darkCopyButton]}
+                onPress={handleCopyExcipientes}
+              >
+                <Ionicons
+                  name="copy-outline"
+                  size={24}
+                  color={isDarkMode ? "#f0f0f0" : "#333"}
+                />
+                <Text
+                  style={[
+                    styles.copyButtonText,
+                    isDarkMode && styles.darkCopyButtonText,
+                  ]}
+                >
+                  Copiar Tabela de Excipientes
+                </Text>
+              </TouchableOpacity>
             </View>
           </>
         )}
@@ -1158,5 +1211,31 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
     fontSize: 12,
+  },
+  copyButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#4299E1",
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 16,
+  },
+  darkCopyButton: {
+    backgroundColor: "#2b6cb0",
+  },
+  copyButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    marginLeft: 8,
+  },
+  darkCopyButtonText: {
+    color: "#f0f0f0",
+  },
+  ordensPesadasHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
   },
 });

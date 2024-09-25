@@ -1,9 +1,8 @@
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { Drawer } from "expo-router/drawer";
+import React from "react";
+import { Tabs } from "expo-router";
 import { ThemeProvider, useTheme } from "./utils/ThemeContext";
-import { ToastProvider } from "./utils/ToastContext";
 import { LoadingProvider } from "./utils/LoadingContext";
-import CustomMenuIcon from "../components/CustomMenuIcon";
+import { ToastProvider } from "./utils/ToastContext";
 import {
   HomeIcon,
   BinsIcon,
@@ -11,90 +10,72 @@ import {
   SettingsIcon,
 } from "../components/MenuIcons";
 
-function DrawerContent() {
+function TabsLayout() {
   const { isDarkMode } = useTheme();
 
   return (
-    <Drawer
-      screenOptions={({ navigation }) => ({
+    <Tabs
+      screenOptions={{
+        tabBarStyle: {
+          backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff",
+          borderTopColor: isDarkMode ? "#333333" : "#e0e0e0",
+        },
+        tabBarActiveTintColor: isDarkMode ? "#63B3ED" : "#4299E1",
+        tabBarInactiveTintColor: isDarkMode ? "#A0AEC0" : "#718096",
         headerStyle: {
-          backgroundColor: isDarkMode ? "#1a1a1a" : "#f5f5f5",
+          backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff",
         },
-        headerTintColor: isDarkMode ? "#f0f0f0" : "#333",
-        drawerStyle: {
-          backgroundColor: isDarkMode ? "#1a1a1a" : "#f5f5f5",
-        },
-        drawerActiveTintColor: "#0077ff",
-        drawerInactiveTintColor: isDarkMode ? "#f0f0f0" : "#333",
-        headerLeft: () => (
-          <CustomMenuIcon onPress={() => navigation.toggleDrawer()} />
-        ),
-      })}
+        headerTintColor: isDarkMode ? "#f0f0f0" : "#333333",
+      }}
     >
-      {/* Pesagem */}
-      <Drawer.Screen
+      <Tabs.Screen
         name="index"
         options={{
-          drawerLabel: "Pesagem",
-          title: "Pesagem",
-          headerShown: true,
-          drawerIcon: ({ focused, size }) => (
-            <HomeIcon size={size} focused={focused} />
+          title: "Home",
+          tabBarIcon: ({ color, size, focused }) => (
+            <HomeIcon size={size} color={color} focused={focused} />
           ),
         }}
       />
-
-      {/* Controle de Bins */}
-      <Drawer.Screen
+      <Tabs.Screen
         name="controleBins"
         options={{
-          drawerLabel: "Controle de Bins",
-          title: "Controle de Bins",
-          headerShown: true,
-          drawerIcon: ({ focused, size }) => (
-            <BinsIcon size={size} focused={focused} />
+          title: "Bins",
+          tabBarIcon: ({ color, size, focused }) => (
+            <BinsIcon size={size} color={color} focused={focused} />
           ),
         }}
       />
-
-      {/* Buscar Excipiente */}
-      <Drawer.Screen
+      <Tabs.Screen
         name="buscarExcipiente"
         options={{
-          drawerLabel: "Buscar Excipiente",
-          title: "Buscar Excipiente",
-          headerShown: true,
-          drawerIcon: ({ focused, size }) => (
-            <SearchIcon size={size} focused={focused} />
+          title: "Buscar",
+          tabBarIcon: ({ color, size, focused }) => (
+            <SearchIcon size={size} color={color} focused={focused} />
           ),
         }}
       />
-
-      <Drawer.Screen
+      <Tabs.Screen
         name="ajustes"
         options={{
-          drawerLabel: "Ajustes",
           title: "Ajustes",
-          headerShown: true,
-          drawerIcon: ({ focused, size }) => (
-            <SettingsIcon size={size} focused={focused} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <SettingsIcon size={size} color={color} focused={focused} />
           ),
         }}
       />
-    </Drawer>
+    </Tabs>
   );
 }
 
 export default function Layout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider>
+    <ThemeProvider>
+      <LoadingProvider>
         <ToastProvider>
-          <LoadingProvider>
-            <DrawerContent />
-          </LoadingProvider>
+          <TabsLayout />
         </ToastProvider>
-      </ThemeProvider>
-    </GestureHandlerRootView>
+      </LoadingProvider>
+    </ThemeProvider>
   );
 }
