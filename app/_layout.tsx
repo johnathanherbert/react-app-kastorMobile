@@ -1,14 +1,13 @@
 import React from "react";
 import { Tabs } from "expo-router";
-import { ThemeProvider, useTheme } from "./utils/ThemeContext";
-import { LoadingProvider } from "./utils/LoadingContext";
-import { ToastProvider } from "./utils/ToastContext";
+import { useTheme } from "../src/contexts/ThemeContext";
 import {
   HomeIcon,
   BinsIcon,
   SearchIcon,
   SettingsIcon,
 } from "../components/MenuIcons";
+import { Providers } from "../src/providers";
 
 function TabsLayout() {
   const { isDarkMode } = useTheme();
@@ -31,7 +30,8 @@ function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
+          title: "Início",
+          tabBarLabel: "Início",
           tabBarIcon: ({ color, size, focused }) => (
             <HomeIcon size={size} color={color} focused={focused} />
           ),
@@ -41,6 +41,7 @@ function TabsLayout() {
         name="controleBins"
         options={{
           title: "Bins",
+          tabBarLabel: "Bins",
           tabBarIcon: ({ color, size, focused }) => (
             <BinsIcon size={size} color={color} focused={focused} />
           ),
@@ -50,6 +51,7 @@ function TabsLayout() {
         name="buscarExcipiente"
         options={{
           title: "Buscar",
+          tabBarLabel: "Buscar",
           tabBarIcon: ({ color, size, focused }) => (
             <SearchIcon size={size} color={color} focused={focused} />
           ),
@@ -59,6 +61,7 @@ function TabsLayout() {
         name="ajustes"
         options={{
           title: "Ajustes",
+          tabBarLabel: "Ajustes",
           tabBarIcon: ({ color, size, focused }) => (
             <SettingsIcon size={size} color={color} focused={focused} />
           ),
@@ -70,12 +73,8 @@ function TabsLayout() {
 
 export default function Layout() {
   return (
-    <ThemeProvider>
-      <LoadingProvider>
-        <ToastProvider>
-          <TabsLayout />
-        </ToastProvider>
-      </LoadingProvider>
-    </ThemeProvider>
+    <Providers>
+      <TabsLayout />
+    </Providers>
   );
 }

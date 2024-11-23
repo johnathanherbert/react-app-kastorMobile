@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { supabase } from "../utils/supabase";
-import { useTheme } from "./utils/ThemeContext";
+import { useTheme } from "../src/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 
 interface ResultadoBusca {

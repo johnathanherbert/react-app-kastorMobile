@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "./utils/ThemeContext";
+import { useTheme } from "../src/contexts/ThemeContext";
 import * as Notifications from "expo-notifications";
 import * as Progress from "react-native-progress";
 import Toast from "react-native-toast-message";

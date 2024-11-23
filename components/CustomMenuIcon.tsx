@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
-import { useTheme } from "../app/utils/ThemeContext";
+import { useTheme } from "../src/contexts/ThemeContext";
 
 interface CustomMenuIconProps {
   onPress: () => void;

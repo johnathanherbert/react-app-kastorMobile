@@ -7,7 +7,7 @@ import {
   ScrollView,
   Switch,
 } from "react-native";
-import { useTheme } from "./utils/ThemeContext";
+import { useTheme } from "../src/contexts/ThemeContext";
 
 export default function Ajustes() {
   const { isDarkMode, toggleTheme } = useTheme();

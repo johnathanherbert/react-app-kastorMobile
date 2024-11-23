@@ -15,7 +15,7 @@ import {
 import { supabase } from "../utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useTheme } from "./utils/ThemeContext";
+import { useTheme } from "../src/contexts/ThemeContext";
 
 interface Ordem {
   codigo: string;
@@ -78,6 +78,9 @@ export default function Index() {
   const [isLoading, setIsLoading] = useState(false);
   const [exibirAutomaticos, setExibirAutomaticos] = useState<boolean>(false);
   const [bins, setBins] = useState<{ numero: string; tara: string }[]>([]);
+  const [showOpInput, setShowOpInput] = useState(false);
+  const [baseOP, setBaseOP] = useState("");
+  const [incrementalOP, setIncrementalOP] = useState("");
   const ordensPesadas = ordens.filter((ordem) => ordem.pesado);
 
   useEffect(() => {
@@ -113,8 +116,9 @@ export default function Index() {
   };
 
   const handleAddOrdem = async () => {
-    if (isLoading) return; // Evita múltiplos cliques enquanto carrega
+    if (isLoading) return;
     setIsLoading(true);
+    
     try {
       const { data, error } = await supabase
         .from("DataBase_ems")
@@ -124,10 +128,24 @@ export default function Index() {
       if (error) {
         Alert.alert("Erro", error.message);
       } else if (data && data.length > 0) {
+        // Determinar a próxima OP
+        let nextOP = "";
+        if (showOpInput && baseOP) {
+          nextOP = incrementalOP || baseOP;
+          // Incrementar para a próxima ordem
+          setIncrementalOP((parseInt(nextOP) + 1).toString().padStart(7, "0"));
+        }
+
         const newOrdens: Ordem[] = [
           ...ordens,
-          { codigo: ativo, nome: data[0].Ativo, pesado: false },
+          { 
+            codigo: ativo, 
+            nome: data[0].Ativo, 
+            pesado: false,
+            op: nextOP || undefined // Adiciona a OP apenas se estiver usando o modo Auto OP
+          },
         ];
+        
         setOrdens(newOrdens);
         calcularExcipientes(newOrdens);
       } else {
@@ -396,13 +414,37 @@ export default function Index() {
             onPress={handleAddOrdem}
             disabled={isLoading}
           >
-            {isLoading ? (
-              <ActivityIndicator size="small" color="white" />
-            ) : (
-              <Text style={styles.addButtonText}>Adicionar</Text>
-            )}
+            <Text style={styles.addButtonText}>
+              {isLoading ? "..." : "Adicionar"}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.opButton, showOpInput && styles.opButtonActive]}
+            onPress={() => setShowOpInput(!showOpInput)}
+          >
+            <Text style={styles.addButtonText}>Auto OP</Text>
           </TouchableOpacity>
         </View>
+
+        {showOpInput && (
+          <View style={styles.opInputWrapper}>
+            <TextInput
+              style={[styles.input, isDarkMode && styles.darkInput]}
+              placeholder="OP inicial (7 dígitos)"
+              placeholderTextColor={isDarkMode ? "#A0AEC0" : "#718096"}
+              value={baseOP}
+              onChangeText={(text) => {
+                const limitedText = text.replace(/[^0-9]/g, "").slice(0, 7);
+                setBaseOP(limitedText);
+                if (limitedText.length === 7) {
+                  setIncrementalOP(limitedText);
+                }
+              }}
+              keyboardType="numeric"
+              maxLength={7}
+            />
+          </View>
+        )}
 
         {ordens.length > 0 && (
           <>
@@ -500,62 +542,39 @@ export default function Index() {
                     )}
                     {aplicandoOP === ordens.indexOf(ordem) && (
                       <View style={styles.opInputContainer}>
-                        <TextInput
-                          style={[
-                            styles.opInput,
-                            isDarkMode && styles.darkOpInput,
-                          ]}
-                          value={opInput}
-                          onChangeText={handleOPInputChange}
-                          placeholder="Ordem de produção..."
-                          placeholderTextColor={
-                            isDarkMode ? "#A0AEC0" : "#718096"
-                          }
-                          keyboardType="numeric"
-                          maxLength={7}
-                        />
+                        <View style={styles.opInputRow}>
+                          <TextInput
+                            style={[styles.opInputField, isDarkMode && styles.darkInput]}
+                            value={opInput}
+                            onChangeText={handleOPInputChange}
+                            placeholder="Ordem de produção..."
+                            placeholderTextColor={isDarkMode ? "#A0AEC0" : "#718096"}
+                            keyboardType="numeric"
+                            maxLength={7}
+                          />
+                        </View>
+                        
                         {bins.map((bin, index) => (
-                          <View
-                            key={index}
-                            style={{
-                              flexDirection: "row",
-                              alignItems: "center",
-                              marginBottom: 12,
-                            }}
-                          >
+                          <View key={index} style={styles.binInputRow}>
                             <TextInput
-                              style={[
-                                styles.opInput,
-                                isDarkMode && styles.darkOpInput,
-                              ]}
+                              style={[styles.binInputField, isDarkMode && styles.darkInput]}
                               value={bin.numero}
-                              onChangeText={(text) =>
-                                handleBinInputChange(index, text)
-                              }
-                              placeholder={`Número do bin ${index + 1}...`}
-                              placeholderTextColor={
-                                isDarkMode ? "#A0AEC0" : "#718096"
-                              }
+                              onChangeText={(text) => handleBinInputChange(index, text)}
+                              placeholder={`Número do bin ${index + 1}`}
+                              placeholderTextColor={isDarkMode ? "#A0AEC0" : "#718096"}
                               keyboardType="numeric"
                             />
                             <TextInput
-                              style={[
-                                styles.opInput,
-                                isDarkMode && styles.darkOpInput,
-                              ]}
+                              style={[styles.binInputField, isDarkMode && styles.darkInput]}
                               value={bin.tara}
-                              onChangeText={(text) =>
-                                handleTaraInputChange(index, text)
-                              }
-                              placeholder={`Tara do bin ${index + 1}(kg)...`}
-                              placeholderTextColor={
-                                isDarkMode ? "#A0AEC0" : "#718096"
-                              }
+                              onChangeText={(text) => handleTaraInputChange(index, text)}
+                              placeholder={`Tara (kg)`}
+                              placeholderTextColor={isDarkMode ? "#A0AEC0" : "#718096"}
                               keyboardType="numeric"
                             />
                             <TouchableOpacity
                               onPress={() => handleRemoveBin(index)}
-                              style={styles.actionButton}
+                              style={styles.removeBinButton}
                             >
                               <Ionicons
                                 name="close-circle-outline"
@@ -565,38 +584,19 @@ export default function Index() {
                             </TouchableOpacity>
                           </View>
                         ))}
-                        <View
-                          style={{
-                            flexDirection: "row",
-                            justifyContent: "space-between",
-                            marginTop: 20,
-                          }}
-                        >
+                        
+                        <View style={styles.opButtonsContainer}>
                           <TouchableOpacity
-                            style={[
-                              styles.confirmOPButton,
-                              isDarkMode && styles.darkConfirmOPButton,
-                              { flex: 1, marginRight: 8 },
-                            ]}
+                            style={[styles.opActionButton, isDarkMode && styles.darkConfirmOPButton]}
                             onPress={handleAddBin}
                           >
-                            <Text style={styles.confirmOPButtonText}>
-                              Adicionar Bin
-                            </Text>
+                            <Text style={styles.confirmOPButtonText}>Adicionar Bin</Text>
                           </TouchableOpacity>
                           <TouchableOpacity
-                            style={[
-                              styles.confirmOPButton,
-                              isDarkMode && styles.darkConfirmOPButton,
-                              { flex: 1, marginLeft: 8 },
-                            ]}
-                            onPress={() =>
-                              handleConfirmarOP(ordens.indexOf(ordem))
-                            }
+                            style={[styles.opActionButton, isDarkMode && styles.darkConfirmOPButton]}
+                            onPress={() => handleConfirmarOP(ordens.indexOf(ordem))}
                           >
-                            <Text style={styles.confirmOPButtonText}>
-                              Confirmar
-                            </Text>
+                            <Text style={styles.confirmOPButtonText}>Confirmar</Text>
                           </TouchableOpacity>
                         </View>
                       </View>
@@ -614,8 +614,8 @@ export default function Index() {
                 </Text>
                 <Text
                   style={[
-                    styles.ordensPesadasCount,
-                    isDarkMode ? styles.darkByText : styles.byText
+                    styles.ordensPesadasHeader,
+                    isDarkMode ? styles.darkByText : styles.byText,
                   ]}
                 >
                   {ordensPesadas.length} OPs pesadas
@@ -985,25 +985,54 @@ const styles = StyleSheet.create({
     color: "#A0AEC0",
   },
   opInputContainer: {
-    flexDirection: "column",
-    alignItems: "stretch",
-    marginTop: 8,
     width: "100%",
+    paddingHorizontal: 8,
+    paddingTop: 12,
+    marginTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: "#E2E8F0",
   },
-  opInput: {
+  opInputRow: {
+    marginBottom: 12,
+  },
+  opInputField: {
     backgroundColor: "white",
     borderWidth: 1,
     borderColor: "#E2E8F0",
     borderRadius: 4,
-    padding: 8,
-    marginBottom: 8,
-    margin: 2,
-    width: 150,
+    padding: 10,
+    height: 40,
   },
-  darkOpInput: {
-    backgroundColor: "#2a2a2a",
-    borderColor: "#4a4a4a",
-    color: "#f0f0f0",
+  binInputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+    gap: 8,
+  },
+  binInputField: {
+    flex: 1,
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 4,
+    padding: 10,
+    height: 40,
+  },
+  removeBinButton: {
+    padding: 8,
+  },
+  opButtonsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 12,
+    gap: 8,
+  },
+  opActionButton: {
+    flex: 1,
+    backgroundColor: "#4299E1",
+    padding: 12,
+    borderRadius: 4,
+    alignItems: "center",
   },
   confirmOPButton: {
     backgroundColor: "#4299E1",
@@ -1201,17 +1230,6 @@ const styles = StyleSheet.create({
   switch: {
     marginLeft: 16, // Ajuste a margem esquerda para mover o switch mais para a direita
   },
-  removeBinButton: {
-    marginLeft: 8,
-    backgroundColor: "#FF6B6B",
-    borderRadius: 4,
-    padding: 4,
-  },
-  removeBinButtonText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 12,
-  },
   copyButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -1238,4 +1256,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 12,
   },
+  opButton: {
+    backgroundColor: "#68D391",
+    borderRadius: 4,
+    alignItems: "center",
+    justifyContent: "center",
+    height: 40,
+    paddingHorizontal: 12,
+    marginLeft: 8,
+  },
+  opButtonActive: {
+    backgroundColor: "#48BB78",
+  },
+  opInputWrapper: {
+    marginBottom: 16,
+  }
 });

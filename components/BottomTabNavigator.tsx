@@ -1,11 +1,11 @@
-import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useTheme } from '../app/utils/ThemeContext';
-import Index from '../app/index';
-import ControleBins from '../app/controleBins';
-import BuscarExcipiente from '../app/buscarExcipiente';
-import Ajustes from '../app/ajustes';
-import { HomeIcon, BinsIcon, SearchIcon, SettingsIcon } from './MenuIcons';
+import React from "react";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { useTheme } from "../src/contexts/ThemeContext";
+import Index from "../app/index";
+import ControleBins from "../app/controleBins";
+import BuscarExcipiente from "../app/buscarExcipiente";
+import Ajustes from "../app/ajustes";
+import { HomeIcon, BinsIcon, SearchIcon, SettingsIcon } from "./MenuIcons";
 
 const Tab = createBottomTabNavigator();
 
@@ -16,11 +16,11 @@ export default function BottomTabNavigator() {
     <Tab.Navigator
       screenOptions={{
         tabBarStyle: {
-          backgroundColor: isDarkMode ? '#1a1a1a' : '#ffffff',
-          borderTopColor: isDarkMode ? '#333333' : '#e0e0e0',
+          backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff",
+          borderTopColor: isDarkMode ? "#333333" : "#e0e0e0",
         },
-        tabBarActiveTintColor: isDarkMode ? '#63B3ED' : '#4299E1',
-        tabBarInactiveTintColor: isDarkMode ? '#A0AEC0' : '#718096',
+        tabBarActiveTintColor: isDarkMode ? "#63B3ED" : "#4299E1",
+        tabBarInactiveTintColor: isDarkMode ? "#A0AEC0" : "#718096",
         headerShown: false,
       }}
     >

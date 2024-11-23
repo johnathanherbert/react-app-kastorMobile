@@ -1,6 +1,6 @@
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "../app/utils/ThemeContext";
+import { useTheme } from "../src/contexts/ThemeContext";
 import { Colors } from "../constants/Colors";
 
 interface IconProps {
