@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useTheme } from "../src/contexts/ThemeContext";
 import Index from "../app/index";
 import ControleBins from "../app/controleBins";
-import BuscarExcipiente from "../app/buscarExcipiente";
+import BuscarExcipiente from "../app/sap";
 import Ajustes from "../app/ajustes";
 import { HomeIcon, BinsIcon, SearchIcon, SettingsIcon } from "./MenuIcons";
 

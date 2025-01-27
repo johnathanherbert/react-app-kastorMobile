@@ -48,10 +48,10 @@ function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="buscarExcipiente"
+        name="sap"
         options={{
-          title: "Buscar",
-          tabBarLabel: "Buscar",
+          title: "SAP",
+          tabBarLabel: "SAP",
           tabBarIcon: ({ color, size, focused }) => (
             <SearchIcon size={size} color={color} focused={focused} />
           ),
