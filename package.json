@@ -22,6 +22,7 @@
     "@react-navigation/native": "^6.0.2",
     "@react-navigation/native-stack": "^6.11.0",
     "@supabase/supabase-js": "^2.45.3",
+    "eas-cli": "^14.5.0",
     "expo": "^51.0.34",
     "expo-clipboard": "~6.0.3",
     "expo-constants": "~16.0.2",
@@ -32,6 +33,7 @@
     "expo-splash-screen": "~0.27.5",
     "expo-status-bar": "~1.12.1",
     "expo-system-ui": "~3.0.7",
+    "expo-updates": "~0.25.25",
     "expo-web-browser": "~13.0.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -45,8 +47,7 @@
     "react-native-svg": "^15.2.0",
     "react-native-toast-message": "^2.2.0",
     "react-native-url-polyfill": "^2.0.0",
-    "react-native-web": "~0.19.10",
-    "expo-updates": "~0.25.25"
+    "react-native-web": "~0.19.10"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

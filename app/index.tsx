@@ -30,6 +30,7 @@ interface OrdemExcipiente {
   codigo: string;
   quantidade: number;
   nome: string;
+  op: string;
 }
 
 interface Excipiente {
@@ -247,7 +248,6 @@ export default function Index() {
   const calcularExcipientes = async (ordens: Ordem[]) => {
     setIsLoading(true);
     try {
-      // Filtrar ordens não pesadas
       const ordensNaoPesadas = ordens.filter((ordem) => !ordem.pesado);
 
       if (ordensNaoPesadas.length === 0) {
@@ -279,13 +279,13 @@ export default function Index() {
                 codigo: ordem.codigo,
                 quantidade: item.qtd_materia_prima,
                 nome: ordem.nome,
+                op: ordem.op ?? '-'
               });
             }
           );
         }
       }
 
-      // Arredonda o total para 3 casas decimais
       for (let excipient in newExcipientes) {
         newExcipientes[excipient].total = Number(
           newExcipientes[excipient].total.toFixed(3)
@@ -466,141 +466,145 @@ export default function Index() {
                       isDarkMode &&
                         filtroOrdem === ordem.codigo &&
                         styles.darkOrdemItemFiltrada,
+                      aplicandoOP === ordens.indexOf(ordem) && { marginBottom: 160 },
                     ]}
                   >
-                    <TouchableOpacity
-                      onPress={() => handleTogglePesado(ordens.indexOf(ordem))}
-                      style={styles.checkboxButton}
-                    >
-                      <Ionicons
-                        name="square-outline"
-                        size={24}
-                        color={isDarkMode ? "#81b0ff" : "#4299E1"}
-                      />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.ordemButton}
-                      onPress={() => handleFiltroOrdem(ordem.codigo)}
-                    >
-                      <Text
-                        style={[
-                          styles.ordemText,
-                          isDarkMode && styles.darkText,
-                          ordem.pesado && styles.ordemTextPesada,
-                        ]}
+                    {ordem.op && (
+                      <View style={[styles.opBadgeContainer, isDarkMode && styles.darkOpBadgeContainer]}>
+                        <Text style={styles.opBadgeText}>OP: {ordem.op}</Text>
+                      </View>
+                    )}
+                    
+                    <View style={styles.ordemContentContainer}>
+                      <TouchableOpacity
+                        onPress={() => handleTogglePesado(ordens.indexOf(ordem))}
+                        style={styles.checkboxButton}
                       >
-                        {ordem.codigo} - {ordem.nome}
-                      </Text>
-                      {ordem.op && (
+                        <Ionicons
+                          name="square-outline"
+                          size={24}
+                          color={isDarkMode ? "#81b0ff" : "#4299E1"}
+                        />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.ordemButton}
+                        onPress={() => handleFiltroOrdem(ordem.codigo)}
+                      >
                         <Text
                           style={[
-                            styles.opText,
-                            isDarkMode && styles.darkOpText,
+                            styles.ordemText,
+                            isDarkMode && styles.darkText,
                             ordem.pesado && styles.ordemTextPesada,
                           ]}
                         >
-                          OP: {ordem.op}{" "}
-                          {ordem.bins && ordem.bins.length > 0 && (
-                            <>
-                              {ordem.bins.map((bin, binIndex) => (
-                                <Text key={binIndex}>
-                                  Bin {binIndex + 1}: {bin.numero} - {bin.tara}{" "}
-                                  kg
-                                </Text>
-                              ))}
-                            </>
-                          )}
+                          {ordem.codigo} - {ordem.nome}
                         </Text>
-                      )}
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => handleAplicarOP(ordens.indexOf(ordem))}
-                      style={styles.actionButton}
-                    >
-                      <Ionicons
-                        name={
-                          ordem.op ? "create-outline" : "add-circle-outline"
-                        }
-                        size={24}
-                        color={isDarkMode ? "#81b0ff" : "#4299E1"}
-                      />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => handleRemoveOrdem(ordens.indexOf(ordem))}
-                      style={styles.actionButton}
-                    >
-                      <Ionicons
-                        name="close-circle-outline"
-                        size={24}
-                        color={isDarkMode ? "#FF6B6B" : "#E53E3E"}
-                      />
-                    </TouchableOpacity>
-                    {filtroOrdem === ordem.codigo && (
-                      <View style={styles.filtroIndicator}>
-                        <Text style={styles.filtroIndicatorText}>Filtrado</Text>
-                      </View>
-                    )}
-                    {aplicandoOP === ordens.indexOf(ordem) && (
-                      <View style={styles.opInputContainer}>
-                        <View style={styles.opInputRow}>
-                          <TextInput
-                            style={[styles.opInputField, isDarkMode && styles.darkInput]}
-                            value={opInput}
-                            onChangeText={handleOPInputChange}
-                            placeholder="Ordem de produção..."
-                            placeholderTextColor={isDarkMode ? "#A0AEC0" : "#718096"}
-                            keyboardType="numeric"
-                            maxLength={7}
-                          />
+                        {ordem.bins && ordem.bins.length > 0 && (
+                          <View style={[styles.binsContainer, isDarkMode && styles.darkBinsContainer]}>
+                            {ordem.bins.map((bin, binIndex) => (
+                              <Text 
+                                key={binIndex}
+                                style={[styles.binText, isDarkMode && styles.darkBinText]}
+                              >
+                                Bin {binIndex + 1}: {bin.numero} - {bin.tara} kg
+                              </Text>
+                            ))}
+                          </View>
+                        )}
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => handleAplicarOP(ordens.indexOf(ordem))}
+                        style={styles.actionButton}
+                      >
+                        <Ionicons
+                          name={
+                            ordem.op ? "create-outline" : "add-circle-outline"
+                          }
+                          size={24}
+                          color={isDarkMode ? "#81b0ff" : "#4299E1"}
+                        />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => handleRemoveOrdem(ordens.indexOf(ordem))}
+                        style={styles.actionButton}
+                      >
+                        <Ionicons
+                          name="close-circle-outline"
+                          size={24}
+                          color={isDarkMode ? "#FF6B6B" : "#E53E3E"}
+                        />
+                      </TouchableOpacity>
+                      {filtroOrdem === ordem.codigo && (
+                        <View style={styles.filtroIndicator}>
+                          <Text style={styles.filtroIndicatorText}>Filtrado</Text>
                         </View>
-                        
-                        {bins.map((bin, index) => (
-                          <View key={index} style={styles.binInputRow}>
-                            <TextInput
-                              style={[styles.binInputField, isDarkMode && styles.darkInput]}
-                              value={bin.numero}
-                              onChangeText={(text) => handleBinInputChange(index, text)}
-                              placeholder={`Número do bin ${index + 1}`}
-                              placeholderTextColor={isDarkMode ? "#A0AEC0" : "#718096"}
-                              keyboardType="numeric"
-                            />
-                            <TextInput
-                              style={[styles.binInputField, isDarkMode && styles.darkInput]}
-                              value={bin.tara}
-                              onChangeText={(text) => handleTaraInputChange(index, text)}
-                              placeholder={`Tara (kg)`}
-                              placeholderTextColor={isDarkMode ? "#A0AEC0" : "#718096"}
-                              keyboardType="numeric"
-                            />
-                            <TouchableOpacity
-                              onPress={() => handleRemoveBin(index)}
-                              style={styles.removeBinButton}
-                            >
-                              <Ionicons
-                                name="close-circle-outline"
-                                size={24}
-                                color={isDarkMode ? "#FF6B6B" : "#E53E3E"}
+                      )}
+                      {aplicandoOP === ordens.indexOf(ordem) && (
+                        <View style={[styles.opInputContainer, isDarkMode && styles.darkOpInputContainer]}>
+                          <View style={[styles.inputsContainer, isDarkMode && styles.darkInputsContainer]}>
+                            <View style={styles.opInputRow}>
+                              <TextInput
+                                style={[styles.opInputField, isDarkMode && styles.darkOpInputField]}
+                                value={opInput}
+                                onChangeText={handleOPInputChange}
+                                placeholder="OP"
+                                placeholderTextColor={isDarkMode ? "#A0AEC0" : "#718096"}
+                                keyboardType="numeric"
+                                maxLength={7}
                               />
+                            </View>
+                            
+                            <View style={styles.binsContainer}>
+                              {bins.map((bin, index) => (
+                                <View key={index} style={styles.binInputRow}>
+                                  <TextInput
+                                    style={[styles.binInputField, isDarkMode && styles.darkBinInputField]}
+                                    value={bin.numero}
+                                    onChangeText={(text) => handleBinInputChange(index, text)}
+                                    placeholder={`Bin ${index + 1}`}
+                                    placeholderTextColor={isDarkMode ? "#A0AEC0" : "#718096"}
+                                    keyboardType="numeric"
+                                  />
+                                  <TextInput
+                                    style={[styles.binInputField, isDarkMode && styles.darkBinInputField]}
+                                    value={bin.tara}
+                                    onChangeText={(text) => handleTaraInputChange(index, text)}
+                                    placeholder="Tara"
+                                    placeholderTextColor={isDarkMode ? "#A0AEC0" : "#718096"}
+                                    keyboardType="numeric"
+                                  />
+                                  <TouchableOpacity
+                                    onPress={() => handleRemoveBin(index)}
+                                    style={styles.removeBinButton}
+                                  >
+                                    <Ionicons
+                                      name="close-circle-outline"
+                                      size={20}
+                                      color={isDarkMode ? "#FF6B6B" : "#E53E3E"}
+                                    />
+                                  </TouchableOpacity>
+                                </View>
+                              ))}
+                            </View>
+                          </View>
+                          
+                          <View style={styles.opButtonsContainer}>
+                            <TouchableOpacity
+                              style={[styles.opActionButton, isDarkMode && styles.darkOpActionButton]}
+                              onPress={handleAddBin}
+                            >
+                              <Text style={styles.confirmOPButtonText}>+ Bin</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={[styles.opActionButton, isDarkMode && styles.darkOpActionButton]}
+                              onPress={() => handleConfirmarOP(ordens.indexOf(ordem))}
+                            >
+                              <Text style={styles.confirmOPButtonText}>Confirmar</Text>
                             </TouchableOpacity>
                           </View>
-                        ))}
-                        
-                        <View style={styles.opButtonsContainer}>
-                          <TouchableOpacity
-                            style={[styles.opActionButton, isDarkMode && styles.darkConfirmOPButton]}
-                            onPress={handleAddBin}
-                          >
-                            <Text style={styles.confirmOPButtonText}>Adicionar Bin</Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            style={[styles.opActionButton, isDarkMode && styles.darkConfirmOPButton]}
-                            onPress={() => handleConfirmarOP(ordens.indexOf(ordem))}
-                          >
-                            <Text style={styles.confirmOPButtonText}>Confirmar</Text>
-                          </TouchableOpacity>
                         </View>
-                      </View>
-                    )}
+                      )}
+                    </View>
                   </View>
                 ))}
             </View>
@@ -630,45 +634,44 @@ export default function Index() {
                     isDarkMode && styles.darkOrdemPesada,
                   ]}
                 >
-                  <TouchableOpacity
-                    onPress={() => handleTogglePesado(ordens.indexOf(ordem))}
-                    style={styles.checkboxButton}
-                  >
-                    <Ionicons
-                      name="checkbox-outline"
-                      size={24}
-                      color={isDarkMode ? "#81b0ff" : "#4299E1"}
-                    />
-                  </TouchableOpacity>
-                  <View style={styles.ordemButton}>
-                    <Text style={[styles.ordemText, styles.ordemTextPesada]}>
-                      {ordem.codigo} - {ordem.nome}
-                    </Text>
-                    {ordem.op && (
-                      <Text style={[styles.opText, styles.ordemTextPesada]}>
-                        OP: {ordem.op}{" "}
-                        {ordem.bins && ordem.bins.length > 0 && (
-                          <>
-                            {ordem.bins.map((bin, binIndex) => (
-                              <Text key={binIndex}>
-                                Bin {binIndex + 1}: {bin.numero} - {bin.tara} kg
-                              </Text>
-                            ))}
-                          </>
-                        )}
+                  {ordem.op && (
+                    <View style={[styles.opBadgePesadaContainer, isDarkMode && styles.darkOpBadgePesadaContainer]}>
+                      <Text style={styles.opBadgePesadaText}>OP: {ordem.op}</Text>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={20}
+                        color="#38A169"
+                        style={styles.checkIcon}
+                      />
+                    </View>
+                  )}
+                  
+                  <View style={styles.ordemContentContainer}>
+                    <TouchableOpacity
+                      onPress={() => handleTogglePesado(ordens.indexOf(ordem))}
+                      style={styles.checkboxButton}
+                    >
+                      <Ionicons
+                        name="checkbox-outline"
+                        size={24}
+                        color={isDarkMode ? "#68D391" : "#38A169"}
+                      />
+                    </TouchableOpacity>
+                    <View style={styles.ordemButton}>
+                      <Text style={[styles.ordemTextPesada, isDarkMode && styles.darkOrdemTextPesada]}>
+                        {ordem.codigo} - {ordem.nome}
                       </Text>
-                    )}
+                      {ordem.bins && ordem.bins.length > 0 && (
+                        <View style={[styles.binsPesadaContainer, isDarkMode && styles.darkBinsPesadaContainer]}>
+                          {ordem.bins.map((bin, binIndex) => (
+                            <Text key={binIndex} style={styles.binPesadaText}>
+                              Bin {binIndex + 1}: {bin.numero} - {bin.tara} kg
+                            </Text>
+                          ))}
+                        </View>
+                      )}
+                    </View>
                   </View>
-                  <TouchableOpacity
-                    onPress={() => handleRemoveOrdem(ordens.indexOf(ordem))}
-                    style={styles.actionButton}
-                  >
-                    <Ionicons
-                      name="close-circle-outline"
-                      size={24}
-                      color={isDarkMode ? "#FF6B6B" : "#E53E3E"}
-                    />
-                  </TouchableOpacity>
                 </View>
               ))}
             </View>
@@ -756,12 +759,7 @@ export default function Index() {
                       </Text>
                     </View>
                     {expandedExcipient === excipient && (
-                      <View
-                        style={[
-                          styles.ordensDetails,
-                          isDarkMode && styles.darkOrdensDetails,
-                        ]}
-                      >
+                      <View style={[styles.ordensDetails, isDarkMode && styles.darkOrdensDetails]}>
                         <View style={styles.ordensDetailHeader}>
                           <Text
                             style={[
@@ -770,7 +768,7 @@ export default function Index() {
                               isDarkMode && styles.darkText,
                             ]}
                           >
-                            Código
+                            OP
                           </Text>
                           <Text
                             style={[
@@ -798,9 +796,7 @@ export default function Index() {
                               styles.ordemDetail,
                               isDarkMode && styles.darkOrdemDetail,
                               index % 2 === 0 && styles.ordemDetailEven,
-                              isDarkMode &&
-                                index % 2 === 0 &&
-                                styles.darkOrdemDetailEven,
+                              isDarkMode && index % 2 === 0 && styles.darkOrdemDetailEven,
                             ]}
                           >
                             <Text
@@ -811,7 +807,7 @@ export default function Index() {
                               ]}
                               numberOfLines={1}
                             >
-                              {ordem.codigo}
+                              {ordem.op || '-'}
                             </Text>
                             <Text
                               style={[
@@ -911,7 +907,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    borderRadius: 4,
+    borderRadius: 8,
     padding: 10,
     height: 40,
     marginRight: 8,
@@ -923,7 +919,7 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: "#4299E1",
-    borderRadius: 4,
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
     height: 40,
@@ -950,18 +946,17 @@ const styles = StyleSheet.create({
   },
   ordemItem: {
     backgroundColor: "white",
-    borderRadius: 8,
-    padding: 12,
+    borderRadius: 12,
     marginBottom: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    flexWrap: "wrap",
+    overflow: 'visible',
     borderWidth: 1,
-    borderColor: "transparent",
-    position: "relative",
+    borderColor: '#E2E8F0',
+    maxWidth: '100%',
+    position: 'relative',
   },
   darkOrdemItem: {
     backgroundColor: "#2a2a2a",
+    borderColor: '#4A5568',
   },
   actionButton: {
     padding: 4,
@@ -976,76 +971,303 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#4A5568",
   },
+  opContainer: {
+    backgroundColor: '#EBF8FF',
+    borderRadius: 6,
+    padding: 8,
+    marginTop: 6,
+    borderLeftWidth: 3,
+    borderLeftColor: '#4299E1',
+  },
+  darkOpContainer: {
+    backgroundColor: '#2D3748',
+  },
   opText: {
-    fontSize: 12,
-    color: "#718096",
-    marginTop: 4,
+    fontSize: 14,
+    color: '#4A5568',
+    fontWeight: '500',
   },
   darkOpText: {
-    color: "#A0AEC0",
+    color: '#A0AEC0',
   },
   opInputContainer: {
-    width: "100%",
-    paddingHorizontal: 8,
-    paddingTop: 12,
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: 16,
     marginTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: "#E2E8F0",
+    zIndex: 9999,
+    elevation: 9999,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+  },
+  darkOpInputContainer: {
+    backgroundColor: '#2D3748',
+    borderColor: '#4A5568',
+    shadowOpacity: 0.3,
+  },
+  inputsContainer: {
+    marginBottom: 8,
+  },
+  darkInputsContainer: {
+    backgroundColor: '#2D3748',
   },
   opInputRow: {
-    marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
   },
   opInputField: {
-    backgroundColor: "white",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 4,
-    padding: 10,
+    flex: 1,
     height: 40,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    backgroundColor: 'white',
+    color: '#333',
+  },
+  darkOpInputField: {
+    backgroundColor: '#1A202C',
+    borderColor: '#4A5568',
+    color: '#f0f0f0',
+  },
+  binsContainer: {
+    marginTop: 8,
   },
   binInputRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 8,
     gap: 8,
   },
   binInputField: {
     flex: 1,
-    backgroundColor: "white",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 4,
-    padding: 10,
     height: 40,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    backgroundColor: 'white',
+    color: '#333',
   },
-  removeBinButton: {
-    padding: 8,
+  darkBinInputField: {
+    backgroundColor: '#1A202C',
+    borderColor: '#4A5568',
+    color: '#f0f0f0',
   },
   opButtonsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 16,
     gap: 8,
   },
   opActionButton: {
     flex: 1,
-    backgroundColor: "#4299E1",
+    height: 40,
+    backgroundColor: '#4299E1',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  darkOpActionButton: {
+    backgroundColor: '#2b6cb0',
+  },
+  ordemContentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 12,
-    borderRadius: 4,
-    alignItems: "center",
   },
-  confirmOPButton: {
-    backgroundColor: "#4299E1",
+  opBadgeContainer: {
+    backgroundColor: '#EBF8FF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
     padding: 8,
-    borderRadius: 4,
+    alignItems: 'flex-start',
+    paddingLeft: 16,
+  },
+  darkOpBadgeContainer: {
+    backgroundColor: '#2D3748',
+    borderBottomColor: '#4A5568',
+  },
+  opBadgeText: {
+    color: '#4299E1',
+    fontWeight: '700',
+    fontSize: 15,
+    letterSpacing: 1,
+  },
+  ordensDetails: {
+    backgroundColor: "#F7FAFC",
+    padding: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#E2E8F0",
+  },
+  darkOrdensDetails: {
+    backgroundColor: "#2D3748",
+    borderTopColor: "#4A5568",
+  },
+  ordensDetailHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+  },
+  darkOrdensDetailHeader: {
+    borderBottomColor: "#4A5568",
+  },
+  ordemDetail: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+  },
+  darkOrdemDetail: {
+    borderBottomColor: "#4A5568",
+  },
+  ordemDetailEven: {
+    backgroundColor: "#EDF2F7",
+  },
+  darkOrdemDetailEven: {
+    backgroundColor: "#2C3E50",
+  },
+  ordemDetailText: {
+    fontSize: 12,
+    color: "#4A5568",
+  },
+  blueText: {
+    color: "#4299E1",
+  },
+  darkBlueText: {
+    color: "#63B3ED",
+  },
+  legendaContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-start",
     alignItems: "center",
+    marginTop: 5,
+    marginBottom: 10,
   },
-  darkConfirmOPButton: {
-    backgroundColor: "#2b6cb0",
+  legendaItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 16,
+    justifyContent: "space-between",
   },
-  confirmOPButtonText: {
+  legendaColor: {
+    width: 12,
+    height: 12,
+    borderRadius: 2,
+    marginRight: 4,
+  },
+  legendaText: {
+    fontSize: 12,
+    color: "#6B7280",
+  },
+  ordemPesada: {
+    backgroundColor: '#F0FFF4',
+    borderColor: '#9AE6B4',
+    opacity: 0.9,
+  },
+  darkOrdemPesada: {
+    backgroundColor: '#1C4532',
+    borderColor: '#2F855A',
+  },
+  opBadgePesadaContainer: {
+    backgroundColor: '#C6F6D5',
+    borderBottomWidth: 1,
+    borderBottomColor: '#9AE6B4',
+    padding: 8,
+    paddingLeft: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingRight: 16,
+  },
+  darkOpBadgePesadaContainer: {
+    backgroundColor: '#276749',
+    borderBottomColor: '#2F855A',
+  },
+  opBadgePesadaText: {
+    color: '#2F855A',
+    fontWeight: '700',
+    fontSize: 15,
+    letterSpacing: 1,
+  },
+  checkIcon: {
+    marginLeft: 8,
+  },
+  ordemTextPesada: {
+    color: '#2F855A',
+    fontSize: 15,
+    fontWeight: '500',
+    textDecorationLine: 'none',
+  },
+  darkOrdemTextPesada: {
+    color: '#9AE6B4',
+  },
+  binsPesadaContainer: {
+    marginTop: 4,
+    paddingTop: 4,
+    borderTopWidth: 1,
+    borderTopColor: '#9AE6B4',
+  },
+  darkBinsPesadaContainer: {
+    borderTopColor: '#2F855A',
+  },
+  binPesadaText: {
+    fontSize: 13,
+    color: '#38A169',
+    marginTop: 2,
+  },
+  ordemItemFiltrada: {
+    borderColor: "#4299E1",
+    backgroundColor: "#EBF8FF",
+  },
+  darkOrdemItemFiltrada: {
+    borderColor: "#63B3ED",
+    backgroundColor: "#2A4365",
+  },
+  filtroIndicator: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    backgroundColor: "#4299E1",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  filtroIndicatorText: {
     color: "white",
+    fontSize: 10,
     fontWeight: "bold",
+  },
+  checkboxButton: {
+    padding: 8,
+    marginRight: 8,
+  },
+  codigoColumn: {
+    flex: 2,
+    marginRight: 8,
+  },
+  ativoColumn: {
+    flex: 4,
+    marginRight: 8,
+  },
+  quantidadeColumn: {
+    flex: 2,
+    textAlign: "right",
   },
   excipientesContainer: {
     marginTop: 20,
@@ -1090,145 +1312,42 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#4A5568",
   },
-  ordensDetails: {
-    backgroundColor: "#F7FAFC",
-    padding: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#E2E8F0",
-  },
-  darkOrdensDetails: {
-    backgroundColor: "#2D3748",
-    borderTopColor: "#4A5568",
-  },
-  ordensDetailHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E2E8F0",
-  },
-  darkOrdensDetailHeader: {
-    borderBottomColor: "#4A5568",
-  },
-  ordensDetailHeaderText: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#4A5568",
-  },
-  ordemDetail: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E2E8F0",
-  },
-  darkOrdemDetail: {
-    borderBottomColor: "#4A5568",
-  },
-  ordemDetailEven: {
-    backgroundColor: "#EDF2F7",
-  },
-  darkOrdemDetailEven: {
-    backgroundColor: "#2C3E50",
-  },
-  ordemDetailText: {
-    fontSize: 12,
-    color: "#4A5568",
-  },
-  blueText: {
-    color: "#4299E1",
-  },
-  darkBlueText: {
-    color: "#63B3ED",
-  },
-  legendaContainer: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    marginTop: 5,
-    marginBottom: 10,
-  },
-  legendaItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginRight: 16,
-    justifyContent: "space-between", // Alinha o switch à direita
-  },
-  legendaColor: {
-    width: 12,
-    height: 12,
-    borderRadius: 2,
-    marginRight: 4,
-  },
-  legendaText: {
-    fontSize: 12,
-    color: "#6B7280",
-  },
-  ordemPesada: {
-    backgroundColor: "#E6FFFA",
-  },
-  darkOrdemPesada: {
-    backgroundColor: "#1D4044",
-  },
-  ordemTextPesada: {
-    color: "#2C7A7B",
-    textDecorationLine: "line-through",
-  },
-  ordemItemFiltrada: {
-    borderColor: "#4299E1",
-    backgroundColor: "#EBF8FF",
-  },
-  darkOrdemItemFiltrada: {
-    borderColor: "#63B3ED",
-    backgroundColor: "#2A4365",
-  },
-  filtroIndicator: {
-    position: "absolute",
-    top: 4,
-    right: 4,
-    backgroundColor: "#4299E1",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  filtroIndicatorText: {
-    color: "white",
-    fontSize: 10,
-    fontWeight: "bold",
-  },
-  checkboxButton: {
-    padding: 8,
-    marginRight: 8,
-  },
-  codigoColumn: {
-    flex: 2,
-    marginRight: 8,
-  },
-  ativoColumn: {
-    flex: 4,
-    marginRight: 8,
-  },
-  quantidadeColumn: {
-    flex: 2,
-    textAlign: "right",
-  },
-  excipientesHeader: {
-    marginBottom: 10,
-  },
-  excipientesHeaderTop: {
+  ordensPesadasHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 5,
+    marginBottom: 12,
   },
-  filtroText: {
-    fontSize: 14,
-    color: "#4299E1",
-    fontStyle: "italic",
-    marginLeft: 5,
+  opButton: {
+    backgroundColor: "#48BB78",
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    height: 40,
+    paddingHorizontal: 12,
+    marginLeft: 8,
   },
-  switch: {
-    marginLeft: 16, // Ajuste a margem esquerda para mover o switch mais para a direita
+  opButtonActive: {
+    backgroundColor: "#48BB78",
+  },
+  opInputWrapper: {
+    marginBottom: 16,
+  },
+  opNumber: {
+    color: '#4299E1',
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  darkBinsContainer: {
+    borderTopColor: '#4A5568',
+  },
+  binText: {
+    fontSize: 13,
+    color: '#718096',
+    marginTop: 2,
+  },
+  darkBinText: {
+    color: '#A0AEC0',
   },
   copyButton: {
     flexDirection: "row",
@@ -1250,25 +1369,41 @@ const styles = StyleSheet.create({
   darkCopyButtonText: {
     color: "#f0f0f0",
   },
-  ordensPesadasHeader: {
+  excipientesHeader: {
+    marginBottom: 10,
+  },
+  excipientesHeaderTop: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 5,
   },
-  opButton: {
-    backgroundColor: "#68D391",
-    borderRadius: 4,
-    alignItems: "center",
-    justifyContent: "center",
-    height: 40,
-    paddingHorizontal: 12,
-    marginLeft: 8,
+  filtroText: {
+    fontSize: 14,
+    color: "#4299E1",
+    fontStyle: "italic",
+    marginLeft: 5,
   },
-  opButtonActive: {
-    backgroundColor: "#48BB78",
+  switch: {
+    marginLeft: 16,
   },
-  opInputWrapper: {
-    marginBottom: 16,
-  }
+  darkConfirmOPButton: {
+    backgroundColor: '#2b6cb0',
+  },
+  removeBinButton: {
+    padding: 4,
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  confirmOPButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  ordensDetailHeaderText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#4A5568',
+  },
 });
