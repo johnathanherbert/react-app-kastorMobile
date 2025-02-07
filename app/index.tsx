@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Switch,
   Clipboard,
+  Modal,
 } from "react-native";
 import { supabase } from "../utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
@@ -379,11 +380,16 @@ export default function Index() {
     );
   };
 
+  const [modalVisible, setModalVisible] = useState(false);
+
   return (
     <SafeAreaView
       style={[styles.container, isDarkMode && styles.darkContainer]}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView 
+        scrollEnabled={!modalVisible} 
+        contentContainerStyle={styles.scrollContent}
+      >
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Ionicons
@@ -469,12 +475,6 @@ export default function Index() {
                       aplicandoOP === ordens.indexOf(ordem) && { marginBottom: 160 },
                     ]}
                   >
-                    {ordem.op && (
-                      <View style={[styles.opBadgeContainer, isDarkMode && styles.darkOpBadgeContainer]}>
-                        <Text style={styles.opBadgeText}>OP: {ordem.op}</Text>
-                      </View>
-                    )}
-                    
                     <View style={styles.ordemContentContainer}>
                       <TouchableOpacity
                         onPress={() => handleTogglePesado(ordens.indexOf(ordem))}
@@ -499,6 +499,15 @@ export default function Index() {
                         >
                           {ordem.codigo} - {ordem.nome}
                         </Text>
+                        {ordem.op && (
+                          <Text style={[
+                            styles.ordemText, 
+                            styles.opText, 
+                            isDarkMode && styles.darkOpText
+                          ]}>
+                            OP {ordem.op}
+                          </Text>
+                        )}
                         {ordem.bins && ordem.bins.length > 0 && (
                           <View style={[styles.binsContainer, isDarkMode && styles.darkBinsContainer]}>
                             {ordem.bins.map((bin, binIndex) => (
@@ -540,28 +549,32 @@ export default function Index() {
                         </View>
                       )}
                       {aplicandoOP === ordens.indexOf(ordem) && (
-                        <View style={[styles.opInputContainer, isDarkMode && styles.darkOpInputContainer]}>
+                        <View style={[styles.opInputContainer, isDarkMode && styles.darkOpInputContainer, { zIndex: 9999 }]}>
                           <View style={[styles.inputsContainer, isDarkMode && styles.darkInputsContainer]}>
+                            {/* Adicionando rótulo para o campo OP */}
                             <View style={styles.opInputRow}>
+                              <Text style={[styles.opInputLabel, isDarkMode && styles.darkText]}>OP:</Text>
                               <TextInput
                                 style={[styles.opInputField, isDarkMode && styles.darkOpInputField]}
                                 value={opInput}
                                 onChangeText={handleOPInputChange}
-                                placeholder="OP"
+                                placeholder="Digite a OP"
                                 placeholderTextColor={isDarkMode ? "#A0AEC0" : "#718096"}
                                 keyboardType="numeric"
                                 maxLength={7}
                               />
                             </View>
                             
+                            {/* Adicionando rótulos para os campos de Bin */}
                             <View style={styles.binsContainer}>
                               {bins.map((bin, index) => (
                                 <View key={index} style={styles.binInputRow}>
+                                  <Text style={[styles.binInputLabel, isDarkMode && styles.darkText]}>Bin {index + 1}:</Text>
                                   <TextInput
                                     style={[styles.binInputField, isDarkMode && styles.darkBinInputField]}
                                     value={bin.numero}
                                     onChangeText={(text) => handleBinInputChange(index, text)}
-                                    placeholder={`Bin ${index + 1}`}
+                                    placeholder="Número do Bin"
                                     placeholderTextColor={isDarkMode ? "#A0AEC0" : "#718096"}
                                     keyboardType="numeric"
                                   />
@@ -858,6 +871,15 @@ export default function Index() {
           </>
         )}
       </ScrollView>
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        style={styles.modalOverlay}
+      >
+        <View style={styles.modalContent}>
+          <Text>Modal Content</Text>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -983,33 +1005,34 @@ const styles = StyleSheet.create({
     backgroundColor: '#2D3748',
   },
   opText: {
-    fontSize: 14,
-    color: '#4A5568',
-    fontWeight: '500',
+    fontSize: 12,
+    color: '#4299E1',
+    fontWeight: 'bold',
+    marginBottom: 5,
+    fontStyle: 'italic',
   },
   darkOpText: {
-    color: '#A0AEC0',
+    color: '#4299E1', 
   },
   opInputContainer: {
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    right: 0,
+    position: 'absolute', 
+    top: '50%', 
+    left: '5%', 
+    width: '90%', 
     backgroundColor: 'white',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    padding: 16,
-    marginTop: 8,
-    zIndex: 9999,
-    elevation: 9999,
+    borderRadius: 10,
+    padding: 15,
+    zIndex: 100001, 
+    elevation: 25, 
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 4,
     },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    alignSelf: 'center',
+    transform: [{ translateY: -50 }],
   },
   darkOpInputContainer: {
     backgroundColor: '#2D3748',
@@ -1181,8 +1204,8 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   darkOrdemPesada: {
-    backgroundColor: '#1C4532',
-    borderColor: '#2F855A',
+    backgroundColor: "#1C4532",
+    borderColor: "#2F855A",
   },
   opBadgePesadaContainer: {
     backgroundColor: '#C6F6D5',
@@ -1405,5 +1428,52 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
     color: '#4A5568',
+  },
+
+
+  opInputLabel: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginRight: 8,
+    color: '#4A5568',
+  },
+  binInputLabel: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginRight: 8,
+    color: '#4A5568',
+  },
+  addButtonPressed: {
+    backgroundColor: '#2b6cb0',
+  },
+  excipientItemSpecial: {
+    borderLeftWidth: 4,
+    borderLeftColor: '#E53E3E',
+  },
+  modalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 99999, // Extremely high z-index
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    position: 'absolute',
+    width: '90%',
+    maxHeight: '80%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    zIndex: 100000, // Even higher z-index for content
+    elevation: 20, // Highest elevation for Android
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    alignSelf: 'center',
   },
 });
